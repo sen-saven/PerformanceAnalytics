@@ -51,77 +51,69 @@
 #'@export
 
 ProbSharpeRatio<-
-function(R = NULL, refSR,Rf=0,p = 0.95, weights = NULL,n = NULL,sr = NULL,sk = NULL, kr = NULL, ...){
+  function(R = NULL, refSR,Rf=0,p = 0.95, weights = NULL,n = NULL,sr = NULL,sk = NULL, kr = NULL, ...){
     columns = 1
     columnnames = NULL
     #Error handling if R is not NULL
     if(!is.null(R)){
-        x = checkData(R)
-        columns = ncol(x)
-        n = nrow(x)
-        #Checking if the weights are provided or not
-        if(!is.null(weights)){
-            if(length(weights)!=columns){
-                stop("number of items in weights is not equal to the number of columns in R")
-            }
-            else{
-                # A potfolio is constructed by applying the weights
-                x = Return.portfolio(R,weights)
-                sr = SharpeRatio(x, Rf, p, "StdDev")
-                sk = skewness(x)
-                kr = kurtosis(x)
-            }
+      x = checkData(R)
+      columns = ncol(x)
+      n = nrow(x)
+      #Checking if the weights are provided or not
+      if(!is.null(weights)){
+        if(length(weights)!=columns){
+          stop("number of items in weights is not equal to the number of columns in R")
         }
         else{
-            sr = SharpeRatio(x, Rf, p, "StdDev")
-            sk = skewness(x)
-            kr = kurtosis(x)
+          # A potfolio is constructed by applying the weights
+          x = Return.portfolio(R,weights)
         }
-
-    columnnames = colnames(x)
-        if(length(refSR)==1){
-          refSR = rep(refSR,columns)
-        }
-        if(length(refSR)!=columns){
-          stop("Reference Sharpe Ratio should be given for each series")
-        }
-        
- 
+      }
+      
+      sr = SharpeRatio(x, Rf, p, "StdDev")
+      sk = skewness(x)
+      kr = kurtosis(x,method='moment')
     }
-    # If R is passed as null checking for sharpe ratio , skewness and kurtosis 
-    else{
-
-        if(is.null(sr) | is.null(sk) | is.null(kr) | is.null(n)){
-             stop("You must either pass R or the Sharpe ratio, Skewness, Kurtosis,n etc")
-       }
-    }
-   
-    if(!is.null(dim(Rf))){
-        Rf = checkData(Rf)
-    }
-    #If the Reference Sharpe Ratio is greater than the Observred Sharpe Ratio an error is displayed
-        index = which(refSR>sr)
-    if(length(index)!=0){
-        if(length(index)==columns){
-            stop("The reference Sharpe Ratio greater than the Observed Sharpe ratio for all the cases")
-        }
-        sr = sr[-index]
-        refSR = refSR[-index]
-        sk = sk[-index]
-        kr = kr[-index]
-        columnnames = columnnames[-index]
-        warning(paste("The Reference Sharpe Ratio greater than the Observed Sharpe Ratio for case",columnnames[index],"\n"))
-        
-    }
-    result = pnorm(((sr - refSR)*((n-1)^(0.5)))/(1-sr*sk+(sr^2)*(kr-1)/4)^(0.5))
-
-    if(!is.null(dim(result))){ 
-        colnames(result) = paste(columnnames,"(SR >",round(refSR,2),")") 
-        
-        rownames(result) = paste("Probabilistic Sharpe Ratio(p=",round(p*100,1),"%):")
-    }
-    return(result)
     
+    columnnames = colnames(x)
+    if(length(refSR)!=columns){      stop("Reference Sharpe Ratio should be given for each series")}
+    
+    
+  }
+# If R is passed as null checking for sharpe ratio , skewness and kurtosis 
+else{
+  
+  if(is.null(sr) | is.null(sk) | is.null(kr) | is.null(n)){
+    stop("You must either pass R or the Sharpe ratio, Skewness, Kurtosis,n etc")
+  }
+}
+
+if(!is.null(dim(Rf))){
+  Rf = checkData(Rf)
+}
+#If the Reference Sharpe Ratio is greater than the Observred Sharpe Ratio an error is displayed
+index = which(refSR>sr)
+if(length(index)!=0){
+  if(length(index)==columns){
+    stop("The reference Sharpe Ratio greater than the Observed Sharpe ratio for all the cases")
+  }
+  sr = sr[-index]
+  refSR = refSR[-index]
+  sk = sk[-index]
+  kr = kr[-index]
+  columnnames = columnnames[-index]
+  warning(paste("The Reference Sharpe Ratio greater than the Observed Sharpe Ratio for case",columnnames[index],"\n"))
+  
+}
+result = pnorm(((sr - refSR)*((n-1)^(0.5)))/(1-sr*sk+(sr^2)*(kr-1)/4)^(0.5))
+
+if(!is.null(dim(result))){ 
+  colnames(result) = paste(columnnames,"(SR >",round(refSR,2),")") 
+  
+  rownames(result) = paste("Probabilistic Sharpe Ratio(p=",round(p*100,1),"%):")
+}
+return(result)
+
 }
 ###############################################################################
 # R (http://r-project.org/) Econometrics for Performance and Risk Analysis
