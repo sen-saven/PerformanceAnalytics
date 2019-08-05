@@ -42,22 +42,22 @@ BenchmarkSR<-function(R){
   
   # FUNCTION:
   x = checkData(R)
-  columns = ncol(x)
+  number_of_columns = ncol(x)
   #TODO : What to do if the number of columns is only one ?  
-  if(columns == 1){
+  if(number_of_columns == 1){
     stop("The number of return series should be greater than 1")
   }
   SR = SharpeRatio.annualized(x)
   sr_avg = mean(SR)
   corr = table.Correlation(R,R)
   corr_avg = 0
-  for(i in 1:(columns-1)){
-    for(j in (i+1):columns){
-      corr_avg = corr_avg + corr[(i-1)*columns+j,1]
+  for(i in 1:(number_of_columns-1)){
+    for(j in (i+1):number_of_columns){
+      corr_avg = corr_avg + corr[(i-1)*number_of_columns+j,1]
     }
   }
-  corr_avg = corr_avg*2/(columns*(columns-1))
-  SR_Benchmark = sr_avg*sqrt(columns/(1+(columns-1)*corr_avg))
+  corr_avg = corr_avg*2/(number_of_columns*(number_of_columns-1))
+  SR_Benchmark = sr_avg*sqrt(number_of_columns/(1+(number_of_columns-1)*corr_avg))
   return(SR_Benchmark)
 }
 ###############################################################################

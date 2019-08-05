@@ -71,7 +71,7 @@ chart.BenchmarkSR<-function(R=NULL,S=NULL,main=NULL,ylab = NULL,xlab = NULL,elem
   # FUNCTION:
   if(!is.null(R)){
     x = checkData(R)
-    columns = ncol(x)
+    number_of_columns = ncol(x)
     avgSR = mean(SharpeRatio.annualized(R))
   }
   else{
@@ -83,12 +83,12 @@ chart.BenchmarkSR<-function(R=NULL,S=NULL,main=NULL,ylab = NULL,xlab = NULL,elem
   vs = vs[1]
   corr = table.Correlation(R,R)
   corr_avg = 0
-  for(i in 1:(columns-1)){
-    for(j in (i+1):columns){
-      corr_avg = corr_avg + corr[(i-1)*columns+j,]
+  for(i in 1:(number_of_columns-1)){
+    for(j in (i+1):number_of_columns){
+      corr_avg = corr_avg + corr[(i-1)*number_of_columns+j,]
     }
   }
-  corr_avg = corr_avg*2/(columns*(columns-1))
+  corr_avg = corr_avg*2/(number_of_columns*(number_of_columns-1))
   if(vs=="sharpe"){
     if(is.null(ylab)){
       ylab = "Benchmark Sharpe Ratio"
@@ -100,7 +100,7 @@ chart.BenchmarkSR<-function(R=NULL,S=NULL,main=NULL,ylab = NULL,xlab = NULL,elem
       main = "Benchmark Sharpe Ratio vs Average Sharpe Ratio"
     }
     sr = seq(0,1,length.out=30)
-    SR_B = sr*sqrt(columns/(1+(columns-1)*corr_avg[1,1]))
+    SR_B = sr*sqrt(number_of_columns/(1+(number_of_columns-1)*corr_avg[1,1]))
     plot(sr,SR_B,type="l",xlab=xlab,ylab=ylab,main=main,lwd = lwd,pch=pch,cex = cex,cex.lab = cex.lab)
     points(avgSR,BenchmarkSR(R),col="blue",pch=10)
     text(avgSR,BenchmarkSR(R),"Return Series ",pos=4)
@@ -117,7 +117,7 @@ chart.BenchmarkSR<-function(R=NULL,S=NULL,main=NULL,ylab = NULL,xlab = NULL,elem
       main = "Benchmark Sharpe Ratio vs Correlation"
     }
     rho = seq(0,1,length.out=30)
-    SR_B = avgSR*sqrt(columns/(1+(columns-1)*rho))
+    SR_B = avgSR*sqrt(number_of_columns/(1+(number_of_columns-1)*rho))
     plot(rho,SR_B,type="l",xlab=xlab,ylab=ylab,main=main,lwd = lwd,pch=pch,cex = cex,cex.lab = cex.lab)
     points(corr_avg[1,1],BenchmarkSR(R),col="blue",pch=10)
     text(corr_avg[1,1],BenchmarkSR(R),"Return Series ",pos=4)
@@ -136,8 +136,8 @@ chart.BenchmarkSR<-function(R=NULL,S=NULL,main=NULL,ylab = NULL,xlab = NULL,elem
     n = seq(2,100,length.out=20)
     SR_B = avgSR*sqrt(n/(1+(n-1)*corr_avg[1,1]))
     plot(n,SR_B,type="l",xlab=xlab,ylab=ylab,main=main,lwd = lwd,pch=pch,cex = cex,cex.lab = cex.lab)
-    points(columns,BenchmarkSR(R),col="blue",pch=10)
-    text(columns,BenchmarkSR(R),"Return Series ",pos=4)
+    points(number_of_columns,BenchmarkSR(R),col="blue",pch=10)
+    text(number_of_columns,BenchmarkSR(R),"Return Series ",pos=4)
   }
 
 }
