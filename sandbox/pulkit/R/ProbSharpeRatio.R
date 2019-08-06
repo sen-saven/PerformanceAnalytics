@@ -31,7 +31,7 @@
 #' To be given in case the return series is not given.
 #' @param n track record length. To be given in case the return series is not given.
 #' @param \dots any other passthru variable 
-#'@author Pulkit Mehrotra
+#'@author Tasos Grivas <tasos@@openriskcalculator.com>, Pulkit Mehrotra
 #'@seealso \code{\link{PsrPortfolio}} \code{\link{table.PSR}} \code{\link{MinTrackRecord}}
 #' @references Bailey, David H. and Lopez de Prado, Marcos, \emph{The Sharpe Ratio 
 #' Efficient Frontier} (July 1, 2012). Journal of Risk, Vol. 15, No. 2, Winter
@@ -51,17 +51,17 @@
 #'@export
 
 ProbSharpeRatio<-
-  function(R = NULL, refSR,Rf=0,p = 0.95, weights = NULL,n = NULL,sr = NULL,sk = NULL, kr = NULL, ...){
-    columns = 1
-    columnnames = NULL
+  function(R = NULL, refSR,Rf=0,p = 0.95, weights = NULL,n = NULL,sr = NULL,sk = NULL, kr = NULL,ignore_skewness = FALSE, ignore_kyrtosis = TRUE ...){
+    num_of_cols = 1
+    column_names = NULL
     #Error handling if R is not NULL
     if(!is.null(R)){
       x = checkData(R)
-      columns = ncol(x)
+      num_of_cols = ncol(x)
       n = nrow(x)
       #Checking if the weights are provided or not
       if(!is.null(weights)){
-        if(length(weights)!=columns){
+        if(length(weights)!=num_of_cols){
           stop("number of items in weights is not equal to the number of columns in R")
         }
         else{
@@ -75,8 +75,8 @@ ProbSharpeRatio<-
       kr = kurtosis(x,method='moment')
     }
     
-    columnnames = colnames(x)
-    if(length(refSR)!=columns){      stop("Reference Sharpe Ratio should be given for each series")}
+    column_names = colnames(x)
+    if(length(refSR)!=num_of_cols){      stop("Reference Sharpe Ratio should be given for each series")}
     
     
   }
@@ -92,23 +92,27 @@ if(!is.null(dim(Rf))){
   Rf = checkData(Rf)
 }
 #If the Reference Sharpe Ratio is greater than the Observred Sharpe Ratio an error is displayed
-index = which(refSR>sr)
-if(length(index)!=0){
-  if(length(index)==columns){
-    stop("The reference Sharpe Ratio greater than the Observed Sharpe ratio for all the cases")
+index_of_higher_tr = which(refSR>sr)
+if(length(index_of_higher_tr)!=0){
+  if(length(index_of_higher_tr)==num_of_cols){
+    stop("The reference Sharpe Ratio greater than the Observed Sharpe ratio for all the timeseries")
   }
-  sr = sr[-index]
-  refSR = refSR[-index]
-  sk = sk[-index]
-  kr = kr[-index]
-  columnnames = columnnames[-index]
-  warning(paste("The Reference Sharpe Ratio greater than the Observed Sharpe Ratio for case",columnnames[index],"\n"))
+  sr = sr[-index_of_higher_tr]
+  refSR = refSR[-index_of_higher_tr]
+  sk = sk[-index_of_higher_tr]
+  kr = kr[-index_of_higher_tr]
+  column_names = column_names[-index_of_higher_tr]
+  warning(paste("The Reference Sharpe Ratio greater than the Observed Sharpe Ratio for the returns of: ",column_names[index_of_higher_tr],"\n"))
   
 }
+
+if(ignore_skewness) sk = 0
+if(ignore_kyrtosis) kr = 3
+
 result = pnorm(((sr - refSR)*((n-1)^(0.5)))/(1-sr*sk+(sr^2)*(kr-1)/4)^(0.5))
 
 if(!is.null(dim(result))){ 
-  colnames(result) = paste(columnnames,"(SR >",round(refSR,2),")") 
+  colnames(result) = paste(column_names,"(SR >",round(refSR,2),")") 
   
   rownames(result) = paste("Probabilistic Sharpe Ratio(p=",round(p*100,1),"%):")
 }
