@@ -116,6 +116,7 @@ if(!is.null(dim(result))){
   
   rownames(result) = paste("Probabilistic Sharpe Ratio(p=",round(p*100,1),"%):")
 }
+conf_interval = qnorm(p)*sqrt((1-sr*sk+(sr^2)*(kr-1)/4)/(n-1))
 return(result)
 
 }
