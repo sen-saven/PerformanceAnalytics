@@ -106,17 +106,24 @@ if(length(index_of_higher_tr)!=0){
   
 }
 
-if(ignore_skewness) sk = 0
-if(ignore_kyrtosis) kr = 3
+if(ignore_skewness) sk = rep(0,num_of_cols)
+if(ignore_kyrtosis) kr = rep(3,num_of_cols)
 
-result = pnorm(((sr - refSR)*((n-1)^(0.5)))/(1-sr*sk+(sr^2)*(kr-1)/4)^(0.5))
+sr_prob = pnorm(((sr - refSR)*((n-1)^(0.5)))/(1-sr*sk+(sr^2)*(kr-1)/4)^(0.5))
 
-if(!is.null(dim(result))){ 
-  colnames(result) = paste(column_names,"(SR >",round(refSR,2),")") 
+if(!is.null(dim(sr_prob))){ 
+  colnames(sr_prob) = paste(column_names,"(SR >",round(refSR,2),")") 
   
-  rownames(result) = paste("Probabilistic Sharpe Ratio(p=",round(p*100,1),"%):")
+  rownames(sr_prob) = paste("Probabilistic Sharpe Ratio(p=",round(p*100,1),"%):")
 }
 conf_interval = qnorm(p)*sqrt((1-sr*sk+(sr^2)*(kr-1)/4)/(n-1))
+
+result = list()
+result$sr_prob = sr_prob
+result$sr_ann_lower = round((sr-conf_interval)*sqrt(12),2)
+result$sr_ann_upper = round((sr+conf_interval)*sqrt(12),2)
+result$sr           = round((sr)*sqrt(12),2)
+
 return(result)
 
 }
