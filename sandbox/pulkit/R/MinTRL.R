@@ -114,7 +114,7 @@ if(length(index_of_higher_tr)!=0){
 
 if(ignore_skewness) sk = rep(0,num_of_cols)
 if(ignore_kyrtosis) kr = rep(3,num_of_cols)
-result = 1 + (1 - sk*sr + ((kr-1)/4)*sr^2)*(qnorm(p)/(sr-refSR))^2
+
 min_tr = 1 + (1 - sk*sr + ((kr-1)/4)*sr^2)*(qnorm(p)/(sr-refSR))^2
 if(!is.null(dim(result))){ 
   colnames(result) = paste(columnnames,"(SR >",round(refSR,2),")") 
